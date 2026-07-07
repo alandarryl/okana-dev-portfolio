@@ -42,7 +42,7 @@ const Product = async ({ params }) => {
             <h1>{product.name}</h1>
             <p>{product.description}</p>
             <p>Price: ${product.price.toFixed(2)}</p>
-            {/* <QuantitySelector /> */}
+            <QuantitySelector />
             <AddToCart product={product.id} />
         </div>
     );
