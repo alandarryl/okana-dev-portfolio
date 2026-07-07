@@ -11,3 +11,10 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
+
+export const metadata = {
+  title: "About Me - Jonathan Okana Portfolio",
+  author: "Jonathan Okana",
+  keywords: ["Jonathan Okana", "portfolio", "about", "projects", "skills"],
+  description: "Learn more about Jonathan Okana, his background, and his skills.",
+};
