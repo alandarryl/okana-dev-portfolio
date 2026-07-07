@@ -30,6 +30,11 @@ const Sidebar = () => {
                         Contact
                     </a>
                 </li>
+                <li className="mb-2">
+                    <a href="/Todos" className="text-blue-500 hover:underline">
+                        Todos
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
