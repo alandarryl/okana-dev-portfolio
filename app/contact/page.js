@@ -1,6 +1,44 @@
 
+"use client";
+
+import { useState } from "react";
 
 const ContactPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }));
+  }
+
+  const handleSubmit = (e) =>{
+    e.preventDefault();
+
+
+    //recupere les valeurs du formulaire
+    const name = e.target.name.value;
+    const email = e.target.email.value;
+    const message = e.target.message.value;
+
+    if(!name || !email || !message){
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    console.log("Form data:", { name, email, message });
+
+    // Réinitialiser le formulaire après l'envoi
+    e.target.reset();
+
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div  className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
@@ -13,18 +51,18 @@ const ContactPage = () => {
           </a></p>
         </div>
         <div  className="bg-white p-6 rounded-lg shadow-md w-full max-w-md mt-6">
-          <form  >
-            <div className="mb-4">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4 ">
               <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Name</label>
-              <input type="text" id="name" className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 " />
             </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
-              <input type="email" id="email" className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="mb-4">
               <label htmlFor="message" className="block text-gray-700 font-medium mb-2">Message</label>
-              <textarea id="message" rows="4" className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+              <textarea id="message" name="message" value={formData.message} onChange={handleChange} rows="4" className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
             <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
               Send Message
