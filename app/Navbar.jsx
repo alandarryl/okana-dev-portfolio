@@ -10,7 +10,6 @@ const Navbar = () => {
               ⚡ MonPortfolio
             </Link>
             <div className="space-x-6">
-              <Link href="/" className="hover:text-cyan-400 transition">Accueil</Link>
               <Link href="/presentation" className="hover:text-cyan-400 transition">Présentation</Link>
               <Link href="/projects" className="hover:text-cyan-400 transition">Projets</Link>
               <Link href="/contact" className="hover:text-cyan-400 transition">Contact</Link>
