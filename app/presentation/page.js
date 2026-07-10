@@ -1,4 +1,7 @@
+"use client";
 
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 
 const resume = {
@@ -25,22 +28,70 @@ const resume = {
 
 
 const ResumePage = () =>{
+    const [resumeData, setResumeData] = useState(null);
+    const [skillsData, setSkillsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(()=>{
+        const fetchSkills = async () =>{
+            try{
+                const { data, error } = await supabase.from('skills').select('*');
+                if(error){
+                    console.error("Error fetching skills:", error);
+                }else{
+                    setSkillsData(data);
+                }
+            } catch(error){
+                console.error("Error fetching skills:", error);
+            } finally{
+                setLoading(false);
+            }
+        }
+
+        const fetchResume = async() =>{
+            try{
+                const { data, error } = await supabase.from('resume').select('*').maybeSingle();
+                console.log("Resume fetch result:", { data, error });
+                if(error){
+                    console.error("Error fetching resume:", error.message || error);
+                } else {
+                    setResumeData(data);
+                }
+            } catch(error){
+                console.error("Error fetching resume:", error);
+            } finally{
+                setLoading(false);
+            }
+        }
+
+        fetchSkills();
+        fetchResume();
+    }, []);
+
+    if(loading){
+        return <div className="p-4 bg-gray-100 min-h-screen flex items-center justify-center">Loading...</div>;
+    }
+
 
 
     return(
         <div >
-            <h1>{resume.name}</h1>
-            <p>{resume.title}</p>
-            <p>{resume.contact.email}</p>
-            <p>{resume.contact.phone}</p>
-            <p>{resume.contact.linkedin}</p>
-            <p>{resume.contact.github}</p>
-            <p>{resume.introduction}</p>
+            <h1>{resumeData?.name || resume.name}</h1>
+            <p>{resumeData?.title || resume.title}</p>
+            <p>{resumeData?.email || resume.contact.email}</p>
+            <p>{resumeData?.phone || resume.contact.phone}</p>
+            <p>{resumeData?.linkedin || resume.contact.linkedin}</p>
+            <p>{resumeData?.github || resume.contact.github}</p>
+            <p>{resumeData?.introduction || resume.introduction}</p>
             <h2>Skills</h2>
             <ul>
-                {resume.skills.map((skill, index) => (
-                    <li key={index}>{skill}</li>
-                ))}
+                {skillsData && skillsData.length > 0 ? (
+                    skillsData.map((skill, index) => (
+                        <li key={index}>{skill.name}</li>
+                    ))
+                ) : (
+                    <li>No skills available.</li>
+                )}
             </ul>
         </div>
     )
