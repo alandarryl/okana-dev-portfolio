@@ -1,85 +1,78 @@
+"use client";
 
+import {supabase }from '../../lib/supabase';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-const projects = {
-    learning_website:{
-        name: "Learning Website",
-        description: "A responsive website for online learning with interactive courses and quizzes.",
-        technologies: ["React.js", "Node.js", "MongoDB"]
-    },
-    portfolio_website:{
-        name: "Portfolio Website",
-        description: "A personal portfolio website showcasing projects and skills.",
-        technologies: ["Next.js", "Tailwind CSS"]
-    },
-    e_commerce_platform:{
-        name: "E-commerce Platform",
-        description: "A full-featured e-commerce platform with shopping cart and payment integration.",
-        technologies: ["React.js", "Express.js", "Stripe API"]
-    },
-    social_media_app:{
-        name: "Social Media App",
-        description: "A social media application with user authentication and real-time chat.",
-        technologies: ["React.js", "Firebase", "Socket.io"]
-    },
-    task_management_tool:{
-        name: "Task Management Tool",
-        description: "A web application for managing tasks and projects with team collaboration features.",
-        technologies: ["Vue.js", "Node.js", "PostgreSQL"]
-    },
-    blog_platform:{
-        name: "Blog Platform",
-        description: "A blogging platform with content management and user engagement features.",
-        technologies: ["Next.js", "GraphQL", "MongoDB"]
-    },
-    pokedex_app:{
-        name: "Pokedex App",
-        description: "A Pokedex application that allows users to search and view information about Pokemon.",
-        technologies: ["React.js", "PokeAPI"]
-    },
-    deep_working_app:{
-        name: "Deep Working App",
-        description: "An application that helps users focus and manage their deep work sessions.",
-        technologies: ["React.js", "Node.js", "MongoDB"]
-    },
-    writing_app:{
-        name: "Writing App",
-        description: "A web application for writers to create, edit, and organize their writing projects.",
-        technologies: ["React.js", "Express.js", "MongoDB"]
-    },
-    student_marketplace:{
-        name: "Student Marketplace",
-        description: "A marketplace platform for students to buy and sell items and services.",
-        technologies: ["React.js", "Node.js", "MongoDB"]
-    }
-};
 
 const ProjectsPage = () => {
+    const [projectsData, setProjectsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProjects = async () =>{
+            try{
+                const { data, error } = await supabase.from('projects').select('*');
+                if(error){
+                    console.error("Error fetching projects:", error);
+                } else {
+                    setProjectsData(data);
+                }
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchProjects();
+    }, []);
+
+    if(loading){
+        return <div className="p-4 bg-gray-100 min-h-screen flex items-center justify-center">Loading...</div>;
+    }
+
     return (
-        <div className="p-4 bg-gray-100 min-h-screen flex flex-col items-center justify-center space-y-4">
-            <h1 className="text-3xl font-bold mb-4">My Projects</h1>
-            <ul className="space-y-4">
-                {Object.entries(projects).map(([key, project]) => (
-                    <li key={key} className="bg-white p-4 rounded-lg shadow-md">
-                        <h2 className="text-xl font-semibold">{project.name}</h2>
-                        <p className="text-gray-600">{project.description}</p>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {project.technologies.map((tech, index) => (
-                                <span key={index} className="bg-blue-500 text-white px-2 py-1 rounded-md text-sm">
-                                    {tech}
-                                </span>
-                            ))}
+    <div className="p-4 bg-gray-100 min-h-screen flex flex-col items-center justify-center space-y-4">
+        <h1 className="text-3xl font-bold mb-4">My Projects</h1>
+        {/* Changement ici : on passe sur une grille pour que ce soit plus joli avec des images */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+            {projectsData.map((project) => (
+                <div key={project.id} className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition flex flex-col">
+                    
+                    {/* 📸 ICI ON RAJOUTE L'IMAGE */}
+                    {project.image_url && (
+                        <img 
+                            src={project.image_url} 
+                            alt={`Illustration de ${project.title || project.name}`} 
+                            className="w-full h-48 object-cover" // h-48 fixe la hauteur, object-cover évite que l'image soit déformée
+                        />
+                    )}
+
+                    {/* Contenu textuel */}
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            {/* Ajuste ici entre project.title ou project.name selon ton Supabase */}
+                            <h2 className="text-xl font-semibold mb-2">{project.title || project.name}</h2>
                         </div>
-                    </li>
-                ))}
-            </ul>
+                        
+                        <div className="flex justify-between items-center mt-auto">
+                            {/* Lien vers la page détail (dossier [id]) */}
+                            <Link href={`/projects/${project.id}`} className="text-blue-500 hover:underline text-sm font-medium">
+                                En savoir plus →
+                            </Link>
+
+                            {/* Lien vers le site en ligne */}
+                            <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-800 text-sm">
+                                View Project 🌐
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            ))}
         </div>
-    );
+    </div>
+);
 };
 
 export default ProjectsPage;
 
-export const metadata = {
-    title: "Projects Page - Jonathan Okana Portfolio",
-    description: "Explore my projects and the technologies I've used to build them.",
-    keywords: ["Jonathan Okana", "portfolio", "projects", "technologies"],
-};
