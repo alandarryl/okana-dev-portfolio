@@ -1,7 +1,7 @@
-
 "use client";
 
 import { useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +9,8 @@ const ContactPage = () => {
     email: '',
     message: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,25 +20,36 @@ const ContactPage = () => {
     }));
   }
 
-  const handleSubmit = (e) =>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
 
+    const { name, email, message } = formData;
 
-    //recupere les valeurs du formulaire
-    const name = e.target.name.value;
-    const email = e.target.email.value;
-    const message = e.target.message.value;
-
-    if(!name || !email || !message){
+    if (!name || !email || !message) {
       alert("Please fill in all fields.");
+      setLoading(false);
       return;
     }
 
-    console.log("Form data:", { name, email, message });
+    try {
+      // 🚀 Envoi direct dans la table "messages" de Supabase
+      const { error } = await supabase
+        .from("messages")
+        .insert([{ name, email, message }]);
 
-    // Réinitialiser le formulaire après l'envoi
-    e.target.reset();
+      if (error) throw error;
 
+      // Si tout s'est bien passé
+      setSuccess(true);
+      setFormData({ name: '', email: '', message: '' }); // Vide le formulaire
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message :", error.message);
+      alert("Une erreur est survenue lors de l'envoi. Réessayez plus tard.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -54,20 +67,32 @@ const ContactPage = () => {
         </div>
         <div className="bg-white p-8 rounded-3xl shadow-xl w-full">
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="mb-4 ">
+            {/* ✨ Alerte de succès */}
+            {success && (
+              <p className="bg-green-100 text-green-700 p-4 rounded-xl text-sm font-medium border border-green-200">
+                Votre message a bien été envoyé ! Je vous répondrai au plus vite. 👍
+              </p>
+            )}
+
+            <div className="mb-4">
               <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Name</label>
-              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 " />
+              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
-              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="mb-4">
               <label htmlFor="message" className="block text-gray-700 font-medium mb-2">Message</label>
-              <textarea id="message" name="message" value={formData.message} onChange={handleChange} rows="4" className="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+              <textarea id="message" name="message" value={formData.message} onChange={handleChange} rows="4" className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
-            <button type="submit" className="bg-blue-500 text-white py-3 px-6 rounded-xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-              Send Message
+            
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-3 px-6 rounded-xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition disabled:bg-blue-300"
+            >
+              {loading ? "Envoi en cours..." : "Send Message"}
             </button>
           </form>
         </div>
@@ -77,4 +102,3 @@ const ContactPage = () => {
 }
 
 export default ContactPage;
-
