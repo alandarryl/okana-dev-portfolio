@@ -1,94 +1,123 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase"; // On remonte de 3 dossiers pour trouver lib
+import { supabase } from "../../../lib/supabase";
 import Link from "next/link";
-import { useParams } from "next/navigation"; // Cet outil sert à attraper l'ID dans l'URL
+import { useParams } from "next/navigation";
 
 const ProjectDetailPage = () => {
-    const params = useParams(); // On récupère les paramètres de l'URL
-    const [project, setProject] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const params = useParams();
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchProjectDetails = async () => {
-            try {
-                // On demande à Supabase le projet où la colonne 'id' est ÉGALE à params.id
-                const { data, error } = await supabase
-                    .from("projects")
-                    .select("*")
-                    .eq("id", params.id)
-                    .single(); // .single() dit à Supabase : "Renvoie-moi 1 seul objet, pas un tableau"
+  useEffect(() => {
+    const fetchProjectDetails = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("*")
+          .eq("id", params.id)
+          .single();
 
-                if (error) {
-                    console.error("Error fetching project details:", error);
-                } else {
-                    setProject(data);
-                }
-            } catch (error) {
-                console.error("Error fetching project details:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (params.id) {
-            fetchProjectDetails();
+        if (error) {
+          console.error("Error fetching project details:", error);
+        } else {
+          setProject(data);
         }
-    }, [params.id]);
+      } catch (error) {
+        console.error("Error fetching project details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (loading) {
-        return <div className="p-4 bg-gray-100 min-h-screen flex items-center justify-center">Chargement du projet...</div>;
+    if (params.id) {
+      fetchProjectDetails();
     }
+  }, [params.id]);
 
-    // Si on n'a pas trouvé de projet avec cet ID
-    if (!project) {
-        return (
-            <div className="p-4 bg-gray-100 min-h-screen flex flex-col items-center justify-center space-y-4">
-                <p className="text-red-500 font-semibold">Projet introuvable ou inexistant.</p>
-                <Link href="/projets" className="text-blue-500 hover:underline">← Retour aux projets</Link>
-            </div>
-        );
-    }
-
+  if (loading) {
     return (
-        <div className="p-4 bg-gray-100 min-h-screen flex flex-col items-center py-10">
-            <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full">
-                
-                {/* Bouton Retour */}
-                <Link href="/projects" className="text-sm text-gray-500 hover:text-gray-800 mb-6 inline-block">
-                    ← Retour à la liste
-                </Link>
-
-                {/* Image du projet en grand */}
-                {project.image_url && (
-                    <img 
-                        src={project.image_url} 
-                        alt={project.title || project.name} 
-                        className="w-full h-64 object-cover rounded-lg mb-6 shadow-sm"
-                    />
-                )}
-
-                {/* Titre et description complète */}
-                <h1 className="text-3xl font-bold mb-4 text-gray-900">{project.title || project.name}</h1>
-                <p className="text-gray-700 leading-relaxed mb-6 whitespace-pre-line">
-                    {project.description}
-                </p>
-
-                {/* Bouton pour tester le projet en vrai */}
-                {project.link && (
-                    <a 
-                        href={project.link} 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block bg-blue-500 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-600 transition"
-                    >
-                        Tester le projet 🌐
-                    </a>
-                )}
-            </div>
-        </div>
+      <div className="min-h-screen bg-[#090d16] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
+      </div>
     );
+  }
+
+  if (!project) {
+    return (
+      <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col items-center justify-center space-y-4">
+        <p className="text-rose-400 font-medium">Projet introuvable ou inexistant.</p>
+        <Link href="/projects" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+          ← Retour aux projets
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#090d16] text-slate-100 px-6 py-12">
+      <div className="max-w-5xl mx-auto space-y-8">
+        
+        {/* Bouton Retour minimaliste */}
+        <Link 
+          href="/projects" 
+          className="text-sm text-slate-400 hover:text-white transition-colors inline-flex items-center gap-2 group"
+        >
+          <span className="transform group-hover:-translate-x-1 transition-transform">←</span> Retour aux projets
+        </Link>
+
+        {/* En-tête : Titre issu de Supabase */}
+        <header className="space-y-2">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+            {project.title || project.name}
+          </h1>
+          <div className="h-1 w-20 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"></div>
+        </header>
+
+        {/* Image principale du projet */}
+        {project.image_url && (
+          <div className="w-full h-[350px] md:h-[450px] rounded-2xl overflow-hidden border border-white/5 bg-slate-950 shadow-2xl">
+            <img 
+              src={project.image_url} 
+              alt={project.title || project.name} 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        {/* Layout en colonnes propre et adaptatif */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-4">
+          
+          {/* Colonne principale : Description */}
+          <div className="md:col-span-2 space-y-4">
+            <h2 className="text-sm font-semibold text-slate-400 tracking-widest uppercase">À propos du projet</h2>
+            <p className="text-slate-300 leading-relaxed text-base whitespace-pre-line font-light">
+              {project.description}
+            </p>
+          </div>
+
+          {/* Colonne latérale : Uniquement le bouton si le lien existe */}
+          <div className="space-y-6">
+            {project.link && (
+              <div className="bg-slate-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-sm">
+                <a 
+                  href={project.link} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full text-center block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/20 hover:-translate-y-0.5"
+                >
+                  Visiter le site en ligne 🌐
+                </a>
+              </div>
+            )}
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
 };
 
 export default ProjectDetailPage;
